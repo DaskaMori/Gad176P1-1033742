@@ -13,16 +13,25 @@ namespace Spawners
         [Header("Spawn Points")]
         public List<Transform> spawnPoints;
 
+        private bool hasDoneInitialSpawn = false;
+
+        public new void Start()
+        {
+            if (spawnPoints != null)
+                spawnPoints.RemoveAll(pt => pt == null);
+
+            Spawn();
+            hasDoneInitialSpawn = true;
+        }
+
         protected override void Spawn()
         {
-            if (spawnPoints == null)
+            if (spawnPoints == null || spawnPoints.Count == 0)
                 return;
 
             foreach (var pt in spawnPoints)
             {
-                if (pt == null) continue;
-
-                GameObject prefab = (Random.value < 0.5f) ? meleePrefab : rangedPrefab;
+                var prefab = Random.value < 0.5f ? meleePrefab : rangedPrefab;
                 if (prefab != null)
                     Instantiate(prefab, pt.position, pt.rotation);
             }
@@ -30,6 +39,11 @@ namespace Spawners
 
         void OnEnable()  => SceneManager.sceneLoaded += OnSceneLoaded;
         void OnDisable() => SceneManager.sceneLoaded -= OnSceneLoaded;
-        private void OnSceneLoaded(Scene scene, LoadSceneMode mode) => Spawn();
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (hasDoneInitialSpawn)
+                Spawn();
+        }
     }
 }

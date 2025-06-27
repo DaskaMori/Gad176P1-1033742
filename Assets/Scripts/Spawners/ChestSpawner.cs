@@ -10,6 +10,8 @@ namespace Spawners
         public GameObject chestPrefab;
         public List<Transform> chestSpawnPoints;
 
+        private bool hasLoadedOnce = false;
+
         protected override void Spawn()
         {
             if (chestPrefab == null || chestSpawnPoints == null)
@@ -22,12 +24,26 @@ namespace Spawners
             }
         }
 
-        void OnEnable() => SceneManager.sceneLoaded += OnSceneLoaded;
-        void OnDisable() => SceneManager.sceneLoaded -= OnSceneLoaded;
+        void OnEnable()
+        {
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        void OnDisable()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            Spawn();
+            if (hasLoadedOnce)
+            {
+                Spawn();
+            }
+            else
+            {
+                hasLoadedOnce = true;
+            }
         }
     }
 }
