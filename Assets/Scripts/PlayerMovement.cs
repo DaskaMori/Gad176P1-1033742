@@ -2,27 +2,28 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections;
 
+[RequireComponent(typeof(Health))]
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Player Setup")]
-    public PlayerID playerID; 
-    
+    public PlayerID playerID;
+
     [Header("Inventory")]
     public bool hasKey = false;
 
     [Header("Grid Movement")]
-    public float moveSpeed = 2f;       
-    public float tileSize = 0.16f;     
+    public float moveSpeed = 2f;
+    public float tileSize  = 0.16f;
 
     [Header("Collision Tilemaps")]
-    public Tilemap collision;          
+    public Tilemap collision;
 
     private ControlsBinding binding;
     private bool isMoving = false;
-    private bool isAlive = true;
+    [SerializeField] public bool isAlive  = true;
     private SpriteRenderer spriteRenderer;
 
-    void Start()
+    void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         binding = ControlsConfig.GetBinding(playerID);
@@ -40,16 +41,12 @@ public class PlayerMovement : MonoBehaviour
 
         if (dir != Vector3.zero && !IsBlocked(dir))
         {
-            if (dir.x > 0) spriteRenderer.flipX = false;
-            else if (dir.x < 0) spriteRenderer.flipX = true;
-
+            spriteRenderer.flipX = dir.x < 0;
             StartCoroutine(MoveOneTile(dir));
         }
 
         if (Input.GetKeyDown(binding.Interact))
-        {
             AttemptInteract();
-        }
     }
 
     private bool IsBlocked(Vector3 direction)
@@ -62,7 +59,6 @@ public class PlayerMovement : MonoBehaviour
     private IEnumerator MoveOneTile(Vector3 direction)
     {
         isMoving = true;
-
         Vector3 startPos = transform.position;
         Vector3 endPos   = startPos + direction * tileSize;
         float duration   = tileSize / moveSpeed;
@@ -81,13 +77,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void AttemptInteract()
     {
-        // TODO: replace this with  interaction logic
         Debug.Log($"Player {playerID} pressed Interact at {transform.position}");
-    }
-
-    public void KillPlayer()
-    {
-        isAlive = false;
-        StopAllCoroutines();
     }
 }

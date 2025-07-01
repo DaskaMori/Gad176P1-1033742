@@ -1,14 +1,15 @@
-
 using UnityEngine;
 using System.Collections;
 
-public class Health : MonoBehaviour, IHealth
+public class Health : MonoBehaviour, IDamageable, IStunnable
 {
     [Header("Health Settings")]
-    public int maxHealth     = 100;
-    public float stunDuration = 1f;
+    public int maxHealth = 100;
+    public int currentHealth;
 
-    private int currentHealth;
+    [Tooltip("Which character this is (One, Two or Monster).")]
+    public PlayerID playerID;
+
     private bool isStunned;
 
     void Awake()
@@ -16,40 +17,61 @@ public class Health : MonoBehaviour, IHealth
         currentHealth = maxHealth;
     }
 
+    void Start()
+    {
+        RefreshUI();
+    }
+
     public void TakeDamage(int amount)
     {
         if (currentHealth <= 0) return;
-        currentHealth -= amount;
-        if (currentHealth <= 0) Die();
+
+        currentHealth = Mathf.Max(0, currentHealth - amount);
+        RefreshUI();
+        if (currentHealth == 0) Die();
+    }
+
+    private void RefreshUI()
+    {
+        if (playerID == PlayerID.One || playerID == PlayerID.Two)
+        {
+            GameUIManager.Instance
+                ?.UpdateHealth((int)playerID, currentHealth, maxHealth);
+        }
     }
 
     public void Stun(float seconds)
     {
-        if (isStunned) return;
+        if (isStunned || currentHealth <= 0) return;
         StartCoroutine(StunRoutine(seconds));
     }
 
     private IEnumerator StunRoutine(float duration)
     {
         isStunned = true;
-
         var pm = GetComponent<PlayerMovement>();
         if (pm != null) pm.enabled = false;
-
-        var eb = GetComponent<EnemyMovementBase>();
+        var eb = GetComponent<EnemyBase>();
         if (eb != null) eb.enabled = false;
 
         yield return new WaitForSeconds(duration);
 
         if (pm != null) pm.enabled = true;
         if (eb != null) eb.enabled = true;
-
         isStunned = false;
     }
 
-
     private void Die()
     {
-        Destroy(gameObject);
+        var pm = GetComponent<PlayerMovement>();
+        if (pm != null)
+        {
+            pm.StopAllCoroutines();
+            pm.isAlive = false;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 }

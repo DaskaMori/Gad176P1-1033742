@@ -145,7 +145,7 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: -0.052114964}
@@ -216,10 +216,9 @@ MonoBehaviour:
   detectRange: 5
   obstacleMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   stunCooldown: 5
-  specialChargeTime: 1.5
-  specialDamage: 100
+  aggroRadius: 3
 --- !u!114 &-3332421736945365973
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -233,4 +232,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 100
-  stunDuration: 1
+  currentHealth: 0
+  playerID: 3

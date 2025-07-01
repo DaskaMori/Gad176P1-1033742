@@ -1,7 +1,5 @@
 using UnityEngine;
 
-public enum PlayerID { One, Two }
-
 public struct ControlsBinding
 {
     public KeyCode Up;

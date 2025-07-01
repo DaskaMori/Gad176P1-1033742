@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
-public abstract class EnemyBase : EnemyMovementBase, IHealth
+public abstract class EnemyBase : EnemyMovementBase, IDamageable, IStunnable
 {
     [Header("Enemy Stats")] public int maxHealth = 3;
     public float detectRange = 5f;
