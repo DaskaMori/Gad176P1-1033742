@@ -1,29 +1,34 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-[RequireComponent(typeof(Collider2D))]
 public class SpinnerTrap : MonoBehaviour
 {
-    [Tooltip("The blade object")]
-    public Transform blade;
-
-    [Tooltip("Rotation speed in degrees per second.")]
+    public GameObject bladePrefab;
+    public float radius = 0.5f;
     public float spinSpeed = 180f;
 
-    [Tooltip("Damage dealt on contact.")]
-    public int damage = 1;
+    private GameObject bladeInstance;
 
-    void Update()
+    void OnEnable()
     {
-        if (blade != null)
-            blade.Rotate(0f, 0f, spinSpeed * Time.deltaTime);
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    void OnTriggerEnter2D(Collider2D other)
+    void OnDisable()
     {
-        var dmgTarget = other.GetComponent<IDamageable>();
-        if (dmgTarget != null)
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (bladePrefab == null) return;
+        bladeInstance = Instantiate(bladePrefab, transform.position, Quaternion.identity, transform);
+        var orbiter = bladeInstance.GetComponent<Orbiter>();
+        if (orbiter != null)
         {
-            dmgTarget.TakeDamage(damage);
+            orbiter.center = transform;
+            orbiter.radius = radius;
+            orbiter.spinSpeed = spinSpeed;
         }
     }
 }
