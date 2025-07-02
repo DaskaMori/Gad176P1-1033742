@@ -45,8 +45,8 @@ public class PlayerMovement : MonoBehaviour
             StartCoroutine(MoveOneTile(dir));
         }
 
-        if (Input.GetKeyDown(binding.Interact))
-            AttemptInteract();
+        if (Input.GetKeyDown(binding.Interact)) 
+            Interact();
     }
 
     private bool IsBlocked(Vector3 direction)
@@ -75,7 +75,7 @@ public class PlayerMovement : MonoBehaviour
         isMoving = false;
     }
 
-    private void AttemptInteract()
+    private void Interact()
     {
         Debug.Log($"Player {playerID} pressed Interact at {transform.position}");
     }

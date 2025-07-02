@@ -1,25 +1,26 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Collider2D))]
+[RequireComponent(typeof(Collider2D), typeof(Rigidbody2D))]
 public class BladeDamage : MonoBehaviour
 {
-    [Tooltip("How much damage each hit does.")]
-    public int damage = 30;
-    float reloadTimer;
+    [Tooltip("Damage dealt on hit.")]
+    public int damage = 50;
 
-    void Update()
+    void Awake()
     {
-        if (reloadTimer > 0f)
-            reloadTimer -= Time.deltaTime;
+        var col = GetComponent<Collider2D>();
+        col.isTrigger = true;
+
+        var rb = GetComponent<Rigidbody2D>();
+        rb.isKinematic = true;
     }
 
-    void OnTriggerEnter2D(Collider2D coll)
+    void OnTriggerEnter2D(Collider2D other)
     {
-        var dmg = coll.GetComponent<IDamageable>();
+        var dmg = other.GetComponentInParent<IDamageable>();
+        if (dmg != null)
         {
             dmg.TakeDamage(damage);
-            Destroy(gameObject);
-            return;
         }
     }
 }
