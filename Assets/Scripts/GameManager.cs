@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -8,7 +7,11 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    [Header("Player References")] public PlayerMovement player1;
+    [Header("Player References")]
+    public PlayerMovement player1;
+    public Transform      player1Spawn;
+    public PlayerMovement player2;
+    public Transform      player2Spawn;
 
     [Header("Rounds")] 
     public int maxRounds = 3;
@@ -19,9 +22,13 @@ public class GameManager : MonoBehaviour
 
     private int currentRound = 1;
     private Dictionary<PlayerID, int> roundWins = new();
-
+    
     private Dictionary<PlayerID, int> keyCounts = new();
     
+    [Header("Respawn Settings")]
+    bool respawningP1 = false;
+    bool respawningP2 = false;
+    public float respawnDelay = 3f;
     void Start()
     {
         ResetRound();
@@ -51,7 +58,14 @@ public class GameManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        ResetRound();
         
+        if (player1 != null && player1.isAlive)
+            player1.transform.position = player1Spawn.position;
+        if (player2 != null && player2.isAlive)
+            player2.transform.position = player2Spawn.position;
+        
+        respawningP1 = respawningP2 = false;
     }
 
     public void AddKey(PlayerID player)
@@ -66,22 +80,24 @@ public class GameManager : MonoBehaviour
         return keyCounts.TryGetValue(player, out var c) ? c : 0;
     }
 
-    public void PlayerWinsRound(PlayerID winningPlayer)
+    public void PlayerWinsRound(PlayerID player)
     {
-        if (!roundWins.ContainsKey(winningPlayer)) roundWins[winningPlayer] = 0;
-        roundWins[winningPlayer]++;
+        if (!roundWins.ContainsKey(player)) 
+            roundWins[player] = 0;
+        roundWins[player]++;
 
-        GameUIManager.Instance.ShowWinText((int)winningPlayer);
-
-        if (roundWins[winningPlayer] >= roundsToWin)
+        if (roundWins[player] >= roundsToWin)
         {
-            StartCoroutine(EndGameCoroutine(winningPlayer));
+            GameUIManager.Instance.ShowGameOverText((int)player);
+            StartCoroutine(EndGameCoroutine(player));
         }
         else
         {
+            GameUIManager.Instance.ShowWinText((int)player);
             StartCoroutine(NextRoundCoroutine());
         }
     }
+
     
     private IEnumerator NextRoundCoroutine()
     {
@@ -104,4 +120,34 @@ public class GameManager : MonoBehaviour
         GameUIManager.Instance.UpdateRound(currentRound);
     }
     
+    void Update()
+    {
+        if (player1 != null && !player1.isAlive && !respawningP1)
+        {
+            respawningP1 = true;
+            StartCoroutine(RespawnPlayer(player1, player1Spawn.position));
+        }
+        if (player2 != null && !player2.isAlive && !respawningP2)
+        {
+            respawningP2 = true;
+            StartCoroutine(RespawnPlayer(player2, player2Spawn.position));
+        }
+    }
+    
+    private IEnumerator RespawnPlayer(PlayerMovement pm, Vector3 spawnPos)
+    {
+        yield return new WaitForSeconds(respawnDelay);
+
+        pm.transform.position = spawnPos;
+
+        var health = pm.GetComponent<Health>();
+        if (health != null)
+            health.ResetHealth();
+
+        pm.isAlive = true;
+        pm.enabled = true;
+
+        if (pm == player1) respawningP1 = false;
+        else if (pm == player2) respawningP2 = false;
+    }
 }

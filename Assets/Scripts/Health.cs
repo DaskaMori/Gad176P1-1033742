@@ -60,6 +60,31 @@ public class Health : MonoBehaviour, IDamageable, IStunnable
         if (eb != null) eb.enabled = true;
         isStunned = false;
     }
+    
+    public void ResetHealth()
+    {
+        StopAllCoroutines();
+        currentHealth = maxHealth;
+        isStunned     = false;
+
+        var pm = GetComponent<PlayerMovement>();
+        if (pm != null)
+        {
+            pm.enabled = true;      
+            pm.isAlive = true;      
+        }
+
+        var col = GetComponent<Collider2D>();
+        if (col != null)
+            col.enabled = true;
+
+        var rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+            rb.simulated = true;
+
+        if (pm != null)
+            GameUIManager.Instance.UpdateHealth((int)pm.playerID, currentHealth, maxHealth);
+    }
 
     private void Die()
     {
