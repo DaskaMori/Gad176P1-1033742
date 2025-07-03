@@ -36,7 +36,6 @@ namespace Spawners
                     Instantiate(prefab, pt.position, pt.rotation);
             }
         }
-
         void OnEnable()  => SceneManager.sceneLoaded += OnSceneLoaded;
         void OnDisable() => SceneManager.sceneLoaded -= OnSceneLoaded;
 
