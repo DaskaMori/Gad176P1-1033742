@@ -49,17 +49,29 @@ public class Health : MonoBehaviour, IDamageable, IStunnable
     private IEnumerator StunRoutine(float duration)
     {
         isStunned = true;
+
         var pm = GetComponent<PlayerMovement>();
-        if (pm != null) pm.enabled = false;
-        var eb = GetComponent<EnemyBase>();
-        if (eb != null) eb.enabled = false;
+        if (pm != null)
+        {
+            pm.StopAllCoroutines();
+            pm.enabled = false;
+        }
+
+        var eb = GetComponent<EnemyMovementBase>();
+        if (eb != null)
+        {
+            eb.StopAllCoroutines();
+            eb.enabled = false;
+        }
 
         yield return new WaitForSeconds(duration);
 
         if (pm != null) pm.enabled = true;
         if (eb != null) eb.enabled = true;
+
         isStunned = false;
     }
+
     
     public void ResetHealth()
     {

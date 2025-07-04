@@ -58,13 +58,32 @@ public class GameManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        var allPlayers = FindObjectsOfType<PlayerMovement>();
+
+        player1 = null;
+        foreach (var p in allPlayers)
+        {
+            if (p.playerID == PlayerID.One)
+            {
+                player1 = p;
+                break;
+            }
+        }
+
+        player2 = null;
+        foreach (var p in allPlayers)
+        {
+            if (p.playerID == PlayerID.Two)
+            {
+                player2 = p;
+                break;
+            }
+        }
+
+        player1Spawn = GameObject.Find("SpawnPointP1")?.transform;
+        player2Spawn = GameObject.Find("SpawnPointP2")?.transform;
+
         ResetRound();
-        
-        if (player1 != null && player1.isAlive)
-            player1.transform.position = player1Spawn.position;
-        if (player2 != null && player2.isAlive)
-            player2.transform.position = player2Spawn.position;
-        
         respawningP1 = respawningP2 = false;
     }
 
@@ -144,8 +163,7 @@ public class GameManager : MonoBehaviour
         if (health != null)
             health.ResetHealth();
 
-        pm.isAlive = true;
-        pm.enabled = true;
+        pm.ResetState();
 
         if (pm == player1) respawningP1 = false;
         else if (pm == player2) respawningP2 = false;

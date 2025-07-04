@@ -1,15 +1,15 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
-public abstract class EnemyBase : EnemyMovementBase, IDamageable, IStunnable
+public abstract class EnemyBase : EnemyMovementBase, IStunnable
 {
-    [Header("Enemy Stats")] public int maxHealth = 3;
+    [Header("Enemy Stats")] 
     public float detectRange = 5f;
 
     [Header("Line of Sight")] [Tooltip("Layers that block sight (e.g. collision walls)")]
     public LayerMask obstacleMask;
 
-    protected int currentHealth;
+    protected Health health;        
     protected Transform[] players;
 
     protected bool HasLineOfSight(Vector3 dest)
@@ -23,7 +23,11 @@ public abstract class EnemyBase : EnemyMovementBase, IDamageable, IStunnable
     protected override void Awake()
     {
         base.Awake();
-        currentHealth = maxHealth;
+
+        health = GetComponent<Health>();
+        if (health == null)
+            Debug.LogError($"{name} needs a Health component!");
+
         var pms = FindObjectsOfType<PlayerMovement>();
         players = new Transform[pms.Length];
         for (int i = 0; i < pms.Length; i++)
@@ -32,15 +36,10 @@ public abstract class EnemyBase : EnemyMovementBase, IDamageable, IStunnable
 
     protected virtual void Update()
     {
-    }
+        if (health.currentHealth <= 0) return;
 
-    public virtual void TakeDamage(int amount)
-    {
-        currentHealth -= amount;
-        if (currentHealth <= 0)
-            Die();
     }
-
+    
     public virtual void Stun(float seconds)
     {
     }
@@ -49,4 +48,6 @@ public abstract class EnemyBase : EnemyMovementBase, IDamageable, IStunnable
     {
         Destroy(gameObject);
     }
+
+    
 }

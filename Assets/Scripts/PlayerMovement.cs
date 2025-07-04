@@ -18,10 +18,15 @@ public class PlayerMovement : MonoBehaviour
     [Header("Collision Tilemaps")]
     public Tilemap collision;
 
+    [Header("Melee")]
+    public MeleeHitBox meleeHitbox;
+    private Vector3 lastDirection = Vector3.down;
+    
     private ControlsBinding binding;
     private bool isMoving = false;
     [SerializeField] public bool isAlive  = true;
     private SpriteRenderer spriteRenderer;
+    
 
     void Awake()
     {
@@ -31,7 +36,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (!isAlive || isMoving) return;
+        if (!isAlive || isMoving|| (meleeHitbox != null && meleeHitbox.IsAttacking)) return;
 
         Vector3 dir = Vector3.zero;
         if (Input.GetKeyDown(binding.Up))    dir = Vector3.up;
@@ -41,12 +46,20 @@ public class PlayerMovement : MonoBehaviour
 
         if (dir != Vector3.zero && !IsBlocked(dir))
         {
+            lastDirection = dir;  
             spriteRenderer.flipX = dir.x < 0;
             StartCoroutine(MoveOneTile(dir));
+            return;
         }
 
         if (Input.GetKeyDown(binding.Interact)) 
             Interact();
+
+        if (Input.GetKeyDown(binding.Attack))
+        {
+            Debug.Log($"[Player{playerID}] Attacking in direction {lastDirection}");
+            meleeHitbox.TriggerAttack(lastDirection, tileSize);
+        }
     }
 
     private bool IsBlocked(Vector3 direction)
@@ -77,6 +90,12 @@ public class PlayerMovement : MonoBehaviour
 
     private void Interact()
     {
-        Debug.Log($"Player {playerID} pressed Interact at {transform.position}");
+    }
+    
+    public void ResetState()
+    {
+        StopAllCoroutines();
+        isMoving = false;
+        isAlive = true;
     }
 }
