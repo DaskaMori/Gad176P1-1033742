@@ -60,6 +60,10 @@ public class GameManager : MonoBehaviour
     {
         var allPlayers = FindObjectsOfType<PlayerMovement>();
 
+        /*
+         * Requires the below code due to the scene reload. Had a bug that cause an error with the respawing function.
+         * This error basically cleared the gamemanager of the player 1 and 2 game objects and their spawn locations.
+         */
         player1 = null;
         foreach (var p in allPlayers)
         {
